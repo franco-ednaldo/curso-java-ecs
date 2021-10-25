@@ -3,11 +3,19 @@ package com.myorg;
 import software.amazon.awscdk.core.App;
 
 public class CursoAwsCdkApp {
-    public static void main(final String[] args) {
-        App app = new App();
+	public static void main(final String[] args) {
+		App app = new App();
 
-        new VpcStack(app, "vpc");
+		VpcStack vpcStack = new VpcStack(app, "vpc");
 
-        app.synth();
-    }
+		ClusterStack clusterStack = new ClusterStack(app, "cluster", vpcStack.getVpc());
+		clusterStack.addDependency(vpcStack);
+
+		RdsStack rdsStack = new RdsStack(app, "Rds", vpcStack.getVpc());
+		SnsStack snsStack = new SnsStack(app, "Sns");
+
+		Service01Stack service01Stack = new Service01Stack(app, "Service01", clusterStack.getCluster());
+		service01Stack.addDependency(clusterStack);
+		app.synth();
+	}
 }
